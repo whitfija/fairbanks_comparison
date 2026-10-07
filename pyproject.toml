@@ -7,7 +7,17 @@ authors = [
     { name = "james jakob whitfield", email = "whitfija@gmail.com" }
 ]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "cdsapi>=0.7.7",
+    "cfgrib>=0.9.15.1",
+    "herbie-data>=2026.9.2",
+    "matplotlib>=3.11.2",
+    "metpy>=1.7.1",
+    "netcdf4>=1.7.4",
+    "pandas>=3.0.6",
+    "siphon>=0.11.0",
+    "xarray>=2026.9.0",
+]
 
 [project.scripts]
 fairbanks-comparison = "fairbanks_comparison:main"

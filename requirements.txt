@@ -1,0 +1,9 @@
+siphon 
+metpy 
+herbie-data 
+cdsapi 
+xarray 
+cfgrib 
+netcdf4 
+pandas 
+matplotlib
