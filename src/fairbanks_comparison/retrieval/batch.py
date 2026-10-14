@@ -1,12 +1,13 @@
+import traceback
 from datetime import datetime, timedelta
 
 import matplotlib
-import traceback
 
 matplotlib.use("Agg")  # batch runs never open plot windows
 
-from .analysis import IMG_DIR, plot_differences, plot_skewt  # noqa: E402
-from .profiles import PROFILE_DIR, build_profiles  # noqa: E402
+from .. import config as cfg
+from ..analysis import plot_differences, plot_skewt  # noqa: E402
+from ..profiles import build_profiles  # noqa: E402
 
 SOURCES = ("radiosonde", "era5", "hrrr")
 
@@ -25,18 +26,16 @@ def launch_times(start: datetime, end: datetime, hours=(0, 12)) -> list[datetime
 
 
 def image_paths(dt: datetime):
-    """(skew-t, differences) PNG paths for one launch time."""
-    return (IMG_DIR / f"skewt_{dt:%Y%m%d%H}.png",
-            IMG_DIR / f"diffs_{dt:%Y%m%d%H}.png")
-
+    return (cfg.IMG_DIR / f"skewt_{dt:%Y%m%d%H}.png",
+            cfg.IMG_DIR / f"diffs_{dt:%Y%m%d%H}.png")
 
 def _has_images(dt: datetime) -> bool:
     return all(p.exists() for p in image_paths(dt))
 
 
 def _has_profiles(dt: datetime) -> bool:
-    return all((PROFILE_DIR / f"{s}_pafa_{dt:%Y%m%d%H}.csv").exists() for s in SOURCES)
-
+    st = cfg.STATION.lower()
+    return all((cfg.PROFILE_DIR / f"{s}_{st}_{dt:%Y%m%d%H}.csv").exists() for s in SOURCES)
 
 def available_times(start: datetime, end: datetime, hours=(0, 12)) -> list[datetime]:
     """Launch times in the range that already have both images."""
@@ -65,7 +64,10 @@ def run_range(start: datetime, end: datetime, hours=(0, 12), force=False) -> lis
             plot_skewt(dt, show=False)
             plot_differences(dt, show=False)
             ok.append(dt)
-        except Exception as e:  # missed launch, network error, request timeout...
+        except LookupError as e:  # no sounding in the archive
+            print(f"  NOT FOUND: {e}")
+            failed.append((dt, str(e)))
+        except Exception as e:  # network error, request timeout, bad file...
             msg = repr(e)
             print(f"  FAILED: {msg}")
             traceback.print_exc(limit=-3)

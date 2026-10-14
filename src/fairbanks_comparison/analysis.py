@@ -5,17 +5,13 @@ import numpy as np
 import pandas as pd
 from metpy.plots import SkewT
 from metpy.units import units
+from . import config as cfg
 
-from .profiles import PROFILE_DIR
-from .retrieval import DATA_DIR
-
-IMG_DIR = DATA_DIR / "img"
-IMG_DIR.mkdir(parents=True, exist_ok=True)
 COLORS = {"radiosonde": "black", "era5": "tab:blue", "hrrr": "tab:red"}
 
 
 def load(name: str, dt: datetime) -> pd.DataFrame:
-    return pd.read_csv(PROFILE_DIR / f"{name}_pafa_{dt:%Y%m%d%H}.csv")
+    return pd.read_csv(cfg.PROFILE_DIR / f"{name}_{cfg.STATION.lower()}_{dt:%Y%m%d%H}.csv")
 
 
 def interp_to(p_target, src: pd.DataFrame, cols=("temp_C", "dewpoint_C", "height_m")):
@@ -56,7 +52,7 @@ def plot_skewt(dt: datetime, show=True):
     skew.plot_moist_adiabats(alpha=0.2)
     skew.ax.legend(loc="upper left")
     skew.ax.set_title(f"PAFA {dt:%Y-%m-%d %H} UTC (solid = T, dashed = Td)")
-    fig.savefig(IMG_DIR / f"skewt_{dt:%Y%m%d%H}.png", dpi=150, bbox_inches="tight")
+    fig.savefig(cfg.IMG_DIR / f"skewt_{dt:%Y%m%d%H}.png", dpi=150, bbox_inches="tight")
     if show:
         plt.show()
     plt.close(fig)
@@ -76,7 +72,7 @@ def plot_differences(dt: datetime, show=True):
         ax.grid(alpha=0.3)
     axes[0].set_ylabel("Pressure (hPa)")
     axes[0].legend()
-    fig.savefig(IMG_DIR / f"diffs_{dt:%Y%m%d%H}.png", dpi=150, bbox_inches="tight")
+    fig.savefig(cfg.IMG_DIR / f"diffs_{dt:%Y%m%d%H}.png", dpi=150, bbox_inches="tight")
     if show:
         plt.show()
     plt.close(fig)

@@ -1,16 +1,13 @@
-import zipfile
 from datetime import datetime
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 
-from . import retrieval as r
-from .retrieval import DATA_DIR, LAT, LON
+from . import config as cfg
+from .retrieval import retrieval as r
 
 G = 9.80665
-PROFILE_DIR = DATA_DIR / "profiles"
-PROFILE_DIR.mkdir(exist_ok=True)
 
 
 def dewpoint_from_q(q, p_hPa):
@@ -46,7 +43,7 @@ def era5_profile(nc_path) -> pd.DataFrame:
     #         nc_path = nc_path.parent / (nc_path.stem + "_unzipped") / z.namelist()[0]
 
     ds = xr.open_dataset(nc_path)
-    col = ds.sel(latitude=LAT, longitude=LON, method="nearest").squeeze()
+    col = ds.sel(latitude=cfg.LAT, longitude=cfg.LON, method="nearest").squeeze()
     p = col["pressure_level"].values.astype(float)
     out = pd.DataFrame({
         "pressure_hPa": p,
@@ -58,8 +55,8 @@ def era5_profile(nc_path) -> pd.DataFrame:
 
 
 def hrrr_profile(ds: xr.Dataset) -> pd.DataFrame:
-    lon0 = LON % 360
-    d2 = (ds.latitude - LAT) ** 2 + ((ds.longitude - lon0) * np.cos(np.radians(LAT))) ** 2
+    lon0 = cfg.LON % 360
+    d2 = (ds.latitude - cfg.LAT) ** 2 + ((ds.longitude - lon0) * np.cos(np.radians(cfg.LAT))) ** 2
     iy, ix = np.unravel_index(int(d2.argmin()), d2.shape)
     col = ds.isel(y=iy, x=ix)
     out = pd.DataFrame({
@@ -80,7 +77,7 @@ def build_profiles(dt: datetime) -> dict[str, pd.DataFrame]:
         "hrrr": hrrr_profile(r.get_hrrr(dt)),
     }
     for name, df in profiles.items():
-        path = PROFILE_DIR / f"{name}_pafa_{dt:%Y%m%d%H}.csv"
+        path = cfg.PROFILE_DIR / f"{name}_{cfg.STATION.lower()}_{dt:%Y%m%d%H}.csv"
         df.to_csv(path, index=False)
         print(f"{name}: {len(df)} levels -> {path}")
     return profiles
