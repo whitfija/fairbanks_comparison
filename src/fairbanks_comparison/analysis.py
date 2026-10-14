@@ -59,6 +59,7 @@ def plot_skewt(dt: datetime, show=True):
     fig.savefig(IMG_DIR / f"skewt_{dt:%Y%m%d%H}.png", dpi=150, bbox_inches="tight")
     if show:
         plt.show()
+    plt.close(fig)
 
 
 def plot_differences(dt: datetime, show=True):
@@ -78,3 +79,4 @@ def plot_differences(dt: datetime, show=True):
     fig.savefig(IMG_DIR / f"diffs_{dt:%Y%m%d%H}.png", dpi=150, bbox_inches="tight")
     if show:
         plt.show()
+    plt.close(fig)
