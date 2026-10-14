@@ -76,7 +76,7 @@ def get_sounding(dt: datetime) -> pd.DataFrame:
         recs.append((num(l[9:15], 100),       # Pa -> hPa
                      num(l[16:21]),           # geopotential height, m
                      t,
-                     t - num(l[34:39], 10)))  # dewpoint = T - dewpoint depression
+                     t - num(l[35:40], 10)))  # dewpoint = T - dewpoint depression
     return pd.DataFrame(recs, columns=["pressure", "height", "temperature", "dewpoint"])
 
 
